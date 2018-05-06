@@ -72,7 +72,7 @@ io.on('connection', function(socket){
 
 });
 
-app.use(express.static(__dirname));
+app.use(express.static('public'));
 
 // APP SERVE STATIC FILE
 app.get('/', function(req, res, next){

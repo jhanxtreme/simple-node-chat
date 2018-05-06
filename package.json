@@ -2,9 +2,9 @@
   "name": "simple-node-chat",
   "version": "1.0.0",
   "description": "A simple node chat",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "node server.js"
   },
   "author": "Jhan Mateo",
   "license": "ISC",
