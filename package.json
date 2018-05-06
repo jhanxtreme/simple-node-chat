@@ -1,0 +1,15 @@
+{
+  "name": "simple-node-chat",
+  "version": "1.0.0",
+  "description": "A simple node chat",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "author": "Jhan Mateo",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.16.3",
+    "socket.io": "^2.1.0"
+  }
+}

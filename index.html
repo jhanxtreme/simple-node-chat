@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Simple Node Chatter</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="styles.css" />
+    <script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+
+<div class="chat-container">
+    <div class="istyping hide">Someone is typing...</div>
+    <div class="users">
+        <div class="text-head">ACTIVE USERS (<span class="num-users">0</span>)</div>
+        <ul class="users-online"></ul>
+    </div>
+    <div class="row messages">
+        <div class="chat-messages"></div>
+    </div>
+    <div class="row input">
+        <div class="form-chat">
+            <input type="text" class="chat-input" placeholder="Enter message here...">
+        </div>
+    </div>
+</div>
+
+<script>
+var SimpleNodeChatter = (function(){
+    function SimpleNodeChatter(){
+        var socket = io();
+        var error = false;
+        var clientId = (Math.random().toString(36) + Date.parse(new Date())).toString(36).substr(2, 8);
+        var userName = '';
+        var chatInput = document.querySelector('.chat-input');
+        var chatMessages = document.querySelector('.chat-messages');
+        var isTyping = document.querySelector('.istyping');
+        var scrollingElement = document.querySelector('.row.messages');
+        var usersOnline = document.querySelector('.users-online');
+        var activeUsers = document.querySelector('.num-users');
+
+        var scrollDown = function(){
+            scrollingElement.scrollTop = scrollingElement.scrollHeight;
+        };
+
+        var getActiveUsers = function(){
+            socket.emit('get active users', {});
+        };
+
+        var sendMessage = function(){
+            var message = chatInput.value;
+            if(userName.length === 0){
+                error = false;
+                didSend = true;
+                userName = prompt('Enter you username');
+                if(userName.length === 0)return;
+                socket.emit('users', {
+                    user: userName,
+                    clientId: clientId
+                });
+            }
+            if(message.length > 0){
+                socket.emit('new message', { 
+                    clientId: clientId,
+                    user: userName,
+                    message: message,
+                    ts: new Date().toISOString()
+                });
+                chatInput.value = '';
+                updateChatStatus(false);
+                scrollDown();
+            }
+        };
+
+        var updateChatStatus = function(a){
+            var message = chatInput.value;
+            if(message.length > 0 && a == true){
+                socket.emit('istyping', {
+                    clientId: clientId,
+                    user: userName,
+                    isTyping: true
+                });
+            }else{
+                socket.emit('istyping', {
+                    clientId: clientId,
+                    user: userName,
+                    isTyping: false
+                });
+            }
+        };
+
+        chatInput.onkeyup = function(e){
+            e.preventDefault();
+            if(e.keyCode === 13){
+                sendMessage();
+            }else{
+                updateChatStatus(true);
+            }
+        };
+
+        socket.on('new message', function(data){
+            if(error) return;
+            user = data;
+            chatMessages.innerHTML += `
+                <div style="position: relative">
+                    <strong>${data.user}</strong><span style="position:absolute; right: 0; font-size:85%">${data.ts}</span>
+                    <div class="chat-message-item">${data.message}</div>
+                </div>
+                `;
+            scrollDown();
+        });
+
+        socket.on('istyping', function(data) {
+            if(data.clientId === clientId) return;
+            if(data.isTyping){
+                isTyping.classList.remove('hide');
+            }else{
+                isTyping.classList.add('hide');
+            }
+        });
+
+        socket.on('users', function(users){
+            var listElement = '';
+            for(var i=users.length-1;i>=0; i--){
+                listElement += `<li>${users[i].user}</li>`
+            }
+            usersOnline.innerHTML = listElement;
+            activeUsers.innerHTML = users.length;
+        });
+
+        socket.on('error duplicate username', function(data){
+            error = true;
+            //only current window will be notified        
+            if(data.clientId === clientId){
+                error = true;
+                userName = '';
+                alert(data.message);
+                return;
+            }
+        });
+        
+        getActiveUsers();
+    }
+    return SimpleNodeChatter;
+})();
+new SimpleNodeChatter();
+    
+</script>    
+</body>
+</html>
