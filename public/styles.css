@@ -4,6 +4,12 @@ body{
 *, *::after, *::before{
     box-sizing: border-box;
 }
+h1{
+    text-align: center;
+}
+ul{
+    list-style-type: none;
+}
 .chat-container{
     border-radius: 4px;
     height: auto;
@@ -62,10 +68,19 @@ body{
     height: 100%;
     border-right: 1px #ddd solid;
     background-color: #fff;
+    overflow: auto;
 }
 .users .text-head{
     padding: 1em;
     text-align: center;
     white-space: nowrap;
     font-size: 90%;
+}
+.users-online{
+    margin: 0;
+    padding: 0;
+}
+.users-online li{
+    padding: 1em;
+    border-bottom: 1px #ddd solid;
 }
